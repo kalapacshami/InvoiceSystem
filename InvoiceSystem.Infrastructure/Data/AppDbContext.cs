@@ -18,5 +18,24 @@ namespace InvoiceSystem.Infrastructure.Data
         public DbSet<Customer> Customers { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Product>(entity =>
+            {
+                entity.Property(p => p.UnitPrice)
+                      .HasPrecision(18, 2);
+            });
+
+            modelBuilder.Entity<OrderItem>(entity =>
+            {
+                entity.Property(oi => oi.UnitPriceAtOrderTime)
+                      .HasPrecision(18, 2);
+            });
+        }
     }
+
+
+    
 }
