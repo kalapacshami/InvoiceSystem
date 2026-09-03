@@ -1,7 +1,9 @@
 ﻿using InvoiceSystem.Application.Dtos;
+using InvoiceSystem.Application.Settings;
 using InvoiceSystem.Domain.Entities;
 using InvoiceSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,9 +14,11 @@ namespace InvoiceSystem.Application.Services
     public class OrderService
     {
         private readonly AppDbContext _context;
-        public OrderService(AppDbContext context)
+        private readonly decimal _discountPercentage;
+        public OrderService(AppDbContext context, IOptions<DiscountSettings> discountSettings)
         {
             _context = context;
+            _discountPercentage = discountSettings.Value.DiscountPercentage;
         }
 
         public async Task<OrderResponse> CreateOrderAsync(CreateOrderRequest request)
@@ -58,17 +62,25 @@ namespace InvoiceSystem.Application.Services
             return MapToResponse(order);
         }
 
-        private static OrderResponse MapToResponse(Order order)
+        private OrderResponse MapToResponse(Order order)
         {
-            var items = order.OrderItems.Select(oi => new OrderItemResponse(
-                oi.ProductId,
-                oi.Product.Name,
-                oi.Quantity,
-                oi.UnitPriceAtOrderTime,
-                oi.Quantity * oi.UnitPriceAtOrderTime,
-                oi.Product.IsHazardous,
-                oi.Product.IsDiscountEligible
-            )).ToList();
+            var items = order.OrderItems.Select(oi =>
+            {
+                var lineSubtotal = oi.Quantity * oi.UnitPriceAtOrderTime;
+                var lineTotal = oi.Product.IsDiscountEligible
+                    ? lineSubtotal * (1 - _discountPercentage / 100m)
+                    : lineSubtotal;
+
+                return new OrderItemResponse(
+                    oi.ProductId,
+                    oi.Product.Name,
+                    oi.Quantity,
+                    oi.UnitPriceAtOrderTime,
+                    lineTotal,
+                    oi.Product.IsHazardous,
+                    oi.Product.IsDiscountEligible
+                );
+            }).ToList();
 
             var total = items.Sum(i => i.LineTotal);
 
