@@ -25,7 +25,7 @@ namespace InvoiceSystem.Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
