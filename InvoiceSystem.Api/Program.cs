@@ -18,6 +18,7 @@ namespace InvoiceSystem.Api
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddScoped<CustomerService>();
             builder.Services.AddScoped<ProductService>();
+            builder.Services.AddScoped<OrderService>();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
