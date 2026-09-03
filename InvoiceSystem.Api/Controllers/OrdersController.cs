@@ -10,10 +10,23 @@ namespace InvoiceSystem.Api.Controllers
     public class OrdersController : ControllerBase
     {
         private readonly OrderService _orderService;
+        private readonly PdfService _pdfService;
 
-        public OrdersController(OrderService orderService)
+        public OrdersController(OrderService orderService, PdfService pdfService)
         {
             _orderService = orderService;
+            _pdfService = pdfService;
+        }
+
+        [HttpGet("{id}/invoice")]
+        public async Task<IActionResult> GetInvoice(int id)
+        {
+            var order = await _orderService.GetByIdAsync(id);
+            if (order is null)
+                return NotFound();
+
+            var pdfBytes = _pdfService.GenerateInvoicePdf(order);
+            return File(pdfBytes, "application/pdf", $"invoice-order-{id}.pdf");
         }
 
         [HttpPost]

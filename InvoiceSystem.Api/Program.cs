@@ -26,6 +26,7 @@ namespace InvoiceSystem.Api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+            builder.Services.AddScoped<PdfService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
