@@ -56,5 +56,57 @@ namespace InvoiceSystem.Application.Documents
                 });
             });
         }
+        private void ComposeContent(IContainer container)
+        {
+            container.PaddingVertical(20).Column(column =>
+            {
+                column.Spacing(10);
+
+                column.Item().Element(ComposeItemsTable);
+
+                column.Item().AlignRight().Text($"TOTAL: {_order.TotalAmount:0.00}")
+                    .FontSize(14).Bold();
+            });
+        }
+
+        private void ComposeItemsTable(IContainer container)
+        {
+            container.Table(table =>
+            {
+                table.ColumnsDefinition(columns =>
+                {
+                    columns.RelativeColumn(3); // Product
+                    columns.RelativeColumn(1); // Qty
+                    columns.RelativeColumn(1); // Unit price
+                    columns.RelativeColumn(1); // Line total
+                    columns.RelativeColumn(2); // Flags
+                });
+
+                table.Header(header =>
+                {
+                    header.Cell().Text("Product").Bold();
+                    header.Cell().Text("Qty").Bold();
+                    header.Cell().Text("Unit Price").Bold();
+                    header.Cell().Text("Line Total").Bold();
+                    header.Cell().Text("Flags").Bold();
+
+                    header.Cell().ColumnSpan(5).PaddingTop(5)
+                        .BorderBottom(1).BorderColor(Colors.Black);
+                });
+
+                foreach (var item in _order.Items)
+                {
+                    table.Cell().Text(item.ProductName);
+                    table.Cell().Text(item.Quantity.ToString());
+                    table.Cell().Text(item.UnitPrice.ToString("0.00"));
+                    table.Cell().Text(item.LineTotal.ToString("0.00"));
+
+                    var flags = new List<string>();
+                    if (item.IsDiscountEligible) flags.Add("Discount");
+                    if (item.IsHazardous) flags.Add("Hazardous");
+                    table.Cell().Text(flags.Count > 0 ? string.Join(", ", flags) : "-");
+                }
+            });
+        }
     }
 }
